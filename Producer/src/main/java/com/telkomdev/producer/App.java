@@ -1,5 +1,3 @@
-package com.telkomdev.producer;
-
 /*
  * Copyright 2019 wuriyanto.com
  *
@@ -16,11 +14,17 @@ package com.telkomdev.producer;
  * limitations under the License.
  */
 
+package com.telkomdev.producer;
+
+import com.telkomdev.producer.model.Product;
+import com.telkomdev.producer.serializer.ProductProtobufSerializer;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.Scanner;
 
@@ -51,7 +55,8 @@ public class App {
         // kafka brokers
         producerConfig.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, brokers);
         producerConfig.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.ByteArraySerializer.class.getName());
-        producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.StringSerializer.class.getName());
+        //producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.StringSerializer.class.getName());
+        producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ProductProtobufSerializer.class.getName());
 
         Producer producer = new KafkaProducer<String, String>(producerConfig);
 
@@ -62,7 +67,19 @@ public class App {
         String input = in.nextLine();
 
         while (!input.equals("exit")) {
-            ProducerRecord<String, String> record = new ProducerRecord<String, String>(topic, input);
+            //ProducerRecord<String, String> record = new ProducerRecord<String, String>(topic, input);
+
+            Product p = new Product();
+            p.setId("001");
+            p.setName("Nokia 6");
+            p.setQuantity(5);
+
+            List<String> images = new ArrayList<>();
+            images.add("wuriyanto.com/img1");
+            images.add("wuriyanto.com/img2");
+            p.setImages(images);
+
+            ProducerRecord<String, Product> record = new ProducerRecord<String, Product>(topic, p);
 
             try {
                 System.out.println(input);
