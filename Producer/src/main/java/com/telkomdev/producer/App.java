@@ -17,6 +17,7 @@
 package com.telkomdev.producer;
 
 import com.telkomdev.producer.model.Product;
+import com.telkomdev.producer.serializer.ProductJsonSerializer;
 import com.telkomdev.producer.serializer.ProductProtobufSerializer;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
@@ -55,8 +56,15 @@ public class App {
         // kafka brokers
         producerConfig.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, brokers);
         producerConfig.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.ByteArraySerializer.class.getName());
+
+        // send String data
         //producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.StringSerializer.class.getName());
-        producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ProductProtobufSerializer.class.getName());
+
+        // send Protocol Buffer data
+        //producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ProductProtobufSerializer.class.getName());
+
+        // send JSON data
+        producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ProductJsonSerializer.class.getName());
 
         Producer producer = new KafkaProducer<String, String>(producerConfig);
 
@@ -87,7 +95,7 @@ public class App {
                 producer.send(record);
                 input = in.nextLine();
             } catch (Exception ex) {
-                System.out.println("error send data to kafka: "+ex.getMessage());
+                System.out.println("error send data to kafka: " + ex.getMessage());
                 break;
             }
         }

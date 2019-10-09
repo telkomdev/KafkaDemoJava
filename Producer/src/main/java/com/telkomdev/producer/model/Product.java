@@ -16,6 +16,8 @@
 
 package com.telkomdev.producer.model;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.telkomdev.producer.protojava.ProductProto;
 
@@ -30,6 +32,8 @@ public class Product {
     private String name;
     private Integer quantity;
     private List<String> images;
+
+    private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     public Product() {
 
@@ -82,6 +86,16 @@ public class Product {
                 ", quantity=" + quantity +
                 ", images=" + images +
                 '}';
+    }
+
+    public byte[] toJson() {
+        return gson.toJson(this).getBytes();
+    }
+
+    public static Product fromJson(byte[] in) {
+        Gson g = new Gson();
+        String jsonString = new String(in);
+        return g.fromJson(jsonString, Product.class);
     }
 
     public ProductProto.Product toProto() {
