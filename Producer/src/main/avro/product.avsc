@@ -1,0 +1,11 @@
+{
+    "namespace": "com.telkomdev.producer.avrojava",
+    "type": "record",
+    "name": "ProductAvro",
+    "fields": [
+        {"name": "id", "type": "string"},
+        {"name": "name", "type": "string"},
+        {"name": "quantity", "type": "int"},
+        {"name": "images", "type": {"type": "array", "items": {"name": "image", "type": "string"}}}
+    ]
+}
