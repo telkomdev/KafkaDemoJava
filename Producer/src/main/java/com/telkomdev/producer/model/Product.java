@@ -16,10 +16,9 @@
 
 package com.telkomdev.producer.model;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.telkomdev.producer.protojava.ProductProto;
+import com.telkomdev.producer.serializer.JsonParser;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,8 +31,6 @@ public class Product {
     private String name;
     private Integer quantity;
     private List<String> images;
-
-    private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     public Product() {
 
@@ -89,13 +86,13 @@ public class Product {
     }
 
     public byte[] toJson() {
-        return gson.toJson(this).getBytes();
+        JsonParser<Product> jp = new JsonParser<>(this, Product.class);
+        return jp.serialize();
     }
 
     public static Product fromJson(byte[] in) {
-        Gson g = new Gson();
-        String jsonString = new String(in);
-        return g.fromJson(jsonString, Product.class);
+        JsonParser<Product> jp = new JsonParser<>(Product.class);
+        return jp.deserialize(in);
     }
 
     public ProductProto.Product toProto() {
