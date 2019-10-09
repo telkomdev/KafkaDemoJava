@@ -17,9 +17,14 @@
 package com.telkomdev.producer.model;
 
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.telkomdev.producer.avrojava.ProductAvro;
 import com.telkomdev.producer.protojava.ProductProto;
 import com.telkomdev.producer.serializer.JsonParser;
+import org.apache.avro.io.*;
+import org.apache.avro.specific.SpecificDatumReader;
+import org.apache.avro.specific.SpecificDatumWriter;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -83,6 +88,59 @@ public class Product {
                 ", quantity=" + quantity +
                 ", images=" + images +
                 '}';
+    }
+
+    public byte[] toAvro() throws IOException {
+        DatumWriter<ProductAvro> datumWriter = new SpecificDatumWriter<>(ProductAvro.class);
+        ProductAvro productAvro = new ProductAvro();
+        productAvro.setId(this.id);
+        productAvro.setName(this.name);
+        productAvro.setQuantity(this.quantity);
+
+        List<CharSequence> imagesAvro = new ArrayList<>();
+        for (String image : this.images) {
+            CharSequence im = new StringBuilder(image);
+            imagesAvro.add(im);
+        }
+        productAvro.setImages(imagesAvro);
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        Encoder encoder = EncoderFactory.get().binaryEncoder(outputStream, null);
+        try {
+            datumWriter.write(productAvro, encoder);
+            encoder.flush();
+            outputStream.close();
+        } catch (IOException ex) {
+            throw ex;
+        }
+
+        return outputStream.toByteArray();
+    }
+
+    public static Product fromAvro(byte[] in) throws IOException {
+        ProductAvro productAvro = null;
+        Product product = new Product();
+        DatumReader<ProductAvro> datumReader = new SpecificDatumReader<>(ProductAvro.class);
+        Decoder decoder = DecoderFactory.get().binaryDecoder(in, null);
+
+        try {
+            productAvro = datumReader.read(null, decoder);
+        } catch (IOException ex) {
+            throw ex;
+        }
+
+        product.setId(productAvro.getId().toString());
+        product.setName(productAvro.getName().toString());
+        product.setQuantity(productAvro.getQuantity());
+
+        List<String> images = new ArrayList<>();
+        for (CharSequence sb : productAvro.getImages()) {
+            images.add(sb.toString());
+        }
+
+        product.setImages(images);
+
+        return product;
     }
 
     public byte[] toJson() {

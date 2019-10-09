@@ -17,6 +17,7 @@
 package com.telkomdev.producer;
 
 import com.telkomdev.producer.model.Product;
+import com.telkomdev.producer.serializer.ProductAvroSerializer;
 import com.telkomdev.producer.serializer.ProductJsonSerializer;
 import com.telkomdev.producer.serializer.ProductProtobufSerializer;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -64,7 +65,10 @@ public class App {
         //producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ProductProtobufSerializer.class.getName());
 
         // send JSON data
-        producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ProductJsonSerializer.class.getName());
+        //producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ProductJsonSerializer.class.getName());
+
+        // send AVRO data
+        producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ProductAvroSerializer.class.getName());
 
         Producer producer = new KafkaProducer<String, String>(producerConfig);
 
