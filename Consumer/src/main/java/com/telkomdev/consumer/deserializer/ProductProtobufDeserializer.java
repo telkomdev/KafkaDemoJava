@@ -39,7 +39,7 @@ public class ProductProtobufDeserializer implements Deserializer<Product> {
         try {
             return data == null ? null : Product.fromProto(data);
         } catch (InvalidProtocolBufferException ex) {
-            throw new SerializationException("Error when serializing");
+            throw new SerializationException("error when deserialize data");
         }
     }
 

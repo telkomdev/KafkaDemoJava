@@ -38,7 +38,7 @@ public class ProductAvroDeserializer implements Deserializer<Product> {
         try {
             return data == null ? null : Product.fromAvro(data);
         } catch (IOException e) {
-            throw new SerializationException("Error when serializing");
+            throw new SerializationException("error when deserialize data");
         }
     }
 
