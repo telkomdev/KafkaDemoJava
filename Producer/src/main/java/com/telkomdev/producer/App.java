@@ -20,14 +20,9 @@ import com.telkomdev.producer.model.Product;
 import com.telkomdev.producer.serializer.ProductAvroSerializer;
 import com.telkomdev.producer.serializer.ProductJsonSerializer;
 import com.telkomdev.producer.serializer.ProductProtobufSerializer;
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.Producer;
-import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.clients.producer.ProducerRecord;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 import java.util.Scanner;
 
 public class App {
@@ -48,34 +43,27 @@ public class App {
             System.exit(0);
         }
 
-        Properties producerConfig = new Properties();
-
-        producerConfig.put(ProducerConfig.CLIENT_ID_CONFIG, "client-1");
-        producerConfig.put(ProducerConfig.RETRIES_CONFIG, 0);
-        producerConfig.put(ProducerConfig.ACKS_CONFIG, "all");
-
-        // kafka brokers
-        producerConfig.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, brokers);
-        producerConfig.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.ByteArraySerializer.class.getName());
-
         // send String data
-        //producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.StringSerializer.class.getName());
+        //String valueSerializer = org.apache.kafka.common.serialization.StringSerializer.class.getName();
 
         // send Protocol Buffer data
-        producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ProductProtobufSerializer.class.getName());
+        String valueSerializer = ProductProtobufSerializer.class.getName();
 
         // send JSON data
-        //producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ProductJsonSerializer.class.getName());
+        // String valueSerializer = ProductJsonSerializer.class.getName());
 
         // send AVRO data
-        //producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ProductAvroSerializer.class.getName());
+        // String valueSerializer = producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ProductAvroSerializer.class.getName();
 
-        Producer producer = new KafkaProducer<String, String>(producerConfig);
+        final MyKafkaProducer<String, Product> producer = new MyKafkaProducer("client-1",
+                org.apache.kafka.common.serialization.StringSerializer.class.getName(),
+                valueSerializer, brokers);
+
 
         // read input
         Scanner in = new Scanner(System.in);
 
-        System.out.println("Type Message (type 'exit' to quit)");
+        System.out.println("Click Enter to send message (type 'exit' to quit)");
         String input = in.nextLine();
 
         while (!input.equals("exit")) {
@@ -91,12 +79,11 @@ public class App {
             images.add("wuriyanto.com/img2");
             p.setImages(images);
 
-            ProducerRecord<String, Product> record = new ProducerRecord<String, Product>(topic, p);
 
             try {
                 System.out.println(input);
 
-                producer.send(record);
+                producer.send(topic, p);
                 input = in.nextLine();
             } catch (Exception ex) {
                 System.out.println("error send data to kafka: " + ex.getMessage());
@@ -105,6 +92,6 @@ public class App {
         }
 
         in.close();
-        producer.close();
+        producer.getProducer().close();
     }
 }
