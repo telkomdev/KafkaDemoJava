@@ -85,6 +85,7 @@ public class App {
 
             while (true) {
 
+                // wait for 1000 ms if there is no message at broker
                 ConsumerRecords<String, Product> records = consumer.poll(Duration.ofMillis(1000));
 
                 records.forEach(record -> {
