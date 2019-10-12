@@ -38,7 +38,7 @@ public class ProductAvroSerializer implements Serializer<Product> {
         try {
             return product == null ? null : product.toAvro();
         } catch (IOException e) {
-            throw new SerializationException("Error when serializing string to byte[] due to unsupported encoding ");
+            throw new SerializationException("Error when serializing data");
         }
     }
 
