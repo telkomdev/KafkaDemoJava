@@ -79,8 +79,6 @@ public class App {
         // subscribe to topic
         consumer.subscribe(Collections.singletonList(topic));
 
-        int noMessageFound = 0;
-
         try {
 
             while (true) {
