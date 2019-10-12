@@ -98,7 +98,7 @@ public class App {
             }
 
         } catch (WakeupException ex) {
-
+            System.out.println("Exception caught " + ex.getMessage());
         } finally {
             consumer.close();
         }
