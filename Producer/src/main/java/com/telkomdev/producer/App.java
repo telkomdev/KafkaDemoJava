@@ -50,7 +50,7 @@ public class App {
 
         Properties producerConfig = new Properties();
 
-        producerConfig.put(ProducerConfig.CLIENT_ID_CONFIG, "consumer-group-1");
+        producerConfig.put(ProducerConfig.CLIENT_ID_CONFIG, "client-1");
         producerConfig.put(ProducerConfig.RETRIES_CONFIG, 0);
         producerConfig.put(ProducerConfig.ACKS_CONFIG, "all");
 
@@ -62,13 +62,13 @@ public class App {
         //producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.StringSerializer.class.getName());
 
         // send Protocol Buffer data
-        //producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ProductProtobufSerializer.class.getName());
+        producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ProductProtobufSerializer.class.getName());
 
         // send JSON data
         //producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ProductJsonSerializer.class.getName());
 
         // send AVRO data
-        producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ProductAvroSerializer.class.getName());
+        //producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ProductAvroSerializer.class.getName());
 
         Producer producer = new KafkaProducer<String, String>(producerConfig);
 
