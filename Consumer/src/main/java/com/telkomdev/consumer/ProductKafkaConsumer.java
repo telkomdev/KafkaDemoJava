@@ -16,7 +16,6 @@
 
 package com.telkomdev.consumer;
 
-import com.telkomdev.consumer.deserializer.ProductProtobufDeserializer;
 import com.telkomdev.consumer.model.Product;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -30,24 +29,16 @@ import java.util.Properties;
 
 public class ProductKafkaConsumer implements Runnable {
 
-    private String brokers;
     private String topic;
-    private String groupId;
-
     private Consumer<String, Product> consumer;
 
     public ProductKafkaConsumer() {
 
     }
 
-    public ProductKafkaConsumer(String brokers, String topic, String groupId) {
-        this.brokers = brokers;
+    public ProductKafkaConsumer(String brokers, String topic, String groupId, String keyDeserializer, String valueDeserializer) {
         this.topic = topic;
-        this.groupId = groupId;
-    }
 
-    @Override
-    public void run() {
         Properties consumerConfig = new Properties();
 
         consumerConfig.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
@@ -58,23 +49,17 @@ public class ProductKafkaConsumer implements Runnable {
         consumerConfig.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
         consumerConfig.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
-        // kafka deserializer
-        consumerConfig.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.ByteArrayDeserializer.class.getName());
+        // key deserializer
+        consumerConfig.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, keyDeserializer);
 
-        // receive String data
-        //consumerConfig.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.StringDeserializer.class.getName());
+        // value deserializer
+        consumerConfig.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, valueDeserializer);
 
-        // receive Protocol Buffer data
-        consumerConfig.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ProductProtobufDeserializer.class.getName());
+        this.consumer = new KafkaConsumer<>(consumerConfig);
+    }
 
-        // receive JSON data
-        //consumerConfig.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ProductJsonDeserializer.class.getName());
-
-        // receive AVRO data
-        //consumerConfig.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ProductAvroDeserializer.class.getName());
-
-        consumer = new KafkaConsumer<>(consumerConfig);
-
+    @Override
+    public void run() {
 
         // subscribe to topic
         consumer.subscribe(Collections.singletonList(topic));

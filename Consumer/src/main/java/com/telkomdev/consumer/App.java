@@ -16,6 +16,8 @@
 
 package com.telkomdev.consumer;
 
+import com.telkomdev.consumer.deserializer.ProductProtobufDeserializer;
+
 import java.util.Scanner;
 
 public class App {
@@ -40,7 +42,21 @@ public class App {
             System.exit(0);
         }
 
-        ProductKafkaConsumer productKafkaConsumer = new ProductKafkaConsumer(brokers, topic, "consumer-group-1");
+        // receive String data
+        // String valueDeserializer = org.apache.kafka.common.serialization.StringDeserializer.class.getName();
+
+        // receive Protocol Buffer data
+        String valueDeserializer = ProductProtobufDeserializer.class.getName();
+
+        // receive JSON data
+        //String valueDeserializer = ProductJsonDeserializer.class.getName();
+
+        // receive AVRO data
+        //String valueDeserializer = ProductAvroDeserializer.class.getName();
+
+
+        ProductKafkaConsumer productKafkaConsumer = new ProductKafkaConsumer(brokers, topic, "consumer-group-1",
+                org.apache.kafka.common.serialization.StringDeserializer.class.getName(), valueDeserializer);
         Thread threadConsumer = new Thread(productKafkaConsumer, "productKafkaConsumer");
         threadConsumer.start();
 
@@ -52,7 +68,7 @@ public class App {
         productKafkaConsumer.getConsumer().wakeup();
         System.out.println("stopping consumer..");
 
-        //
+        // wait for current thread finish
         threadConsumer.join();
     }
 }
