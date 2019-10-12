@@ -16,23 +16,15 @@
 
 package com.telkomdev.consumer;
 
-import com.telkomdev.consumer.deserializer.ProductAvroDeserializer;
-import com.telkomdev.consumer.deserializer.ProductJsonDeserializer;
-import com.telkomdev.consumer.deserializer.ProductProtobufDeserializer;
-import com.telkomdev.consumer.model.Product;
-import org.apache.kafka.clients.consumer.Consumer;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.common.errors.WakeupException;
-
-import java.time.Duration;
-import java.util.Collections;
-import java.util.Properties;
+import java.util.Scanner;
 
 public class App {
 
-    public static void main(String[] args) {
+    private static Scanner in;
+
+    public static void main(String[] args) throws Exception {
+
+        in = new Scanner(System.in);
 
         String brokers = System.getenv("BROKERS");
         String topic = System.getenv("TOPIC");
@@ -48,60 +40,19 @@ public class App {
             System.exit(0);
         }
 
-        Properties consumerConfig = new Properties();
+        ProductKafkaConsumer productKafkaConsumer = new ProductKafkaConsumer(brokers, topic, "consumer-group-1");
+        Thread threadConsumer = new Thread(productKafkaConsumer, "productKafkaConsumer");
+        threadConsumer.start();
 
-        consumerConfig.put(ConsumerConfig.GROUP_ID_CONFIG, "consumer-group-1");
-
-        // kafka brokers
-        consumerConfig.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, brokers);
-        consumerConfig.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 1);
-        consumerConfig.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
-        consumerConfig.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-
-        // kafka deserializer
-        consumerConfig.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.ByteArrayDeserializer.class.getName());
-
-        // receive String data
-        //consumerConfig.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.StringDeserializer.class.getName());
-
-        // receive Protocol Buffer data
-        consumerConfig.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ProductProtobufDeserializer.class.getName());
-
-        // receive JSON data
-        //consumerConfig.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ProductJsonDeserializer.class.getName());
-
-        // receive AVRO data
-        //consumerConfig.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ProductAvroDeserializer.class.getName());
-
-        Consumer consumer = new KafkaConsumer<String, String>(consumerConfig);
-
-
-        // subscribe to topic
-        consumer.subscribe(Collections.singletonList(topic));
-
-        try {
-
-            while (true) {
-
-                // wait for 1000 ms if there is no message at broker
-                ConsumerRecords<String, Product> records = consumer.poll(Duration.ofMillis(1000));
-
-                records.forEach(record -> {
-                    System.out.println("Record Key " + record.key());
-                    System.out.println("Record value " + record.value());
-                    System.out.println("Record partition " + record.partition());
-                    System.out.println("Record offset " + record.offset());
-                });
-
-                // commits the offset of record to broker.
-                consumer.commitAsync();
-            }
-
-        } catch (WakeupException ex) {
-            System.out.println("Exception caught " + ex.getMessage());
-        } finally {
-            consumer.close();
+        String line = "";
+        while (!line.equals("exit")) {
+            line = in.next();
         }
 
+        productKafkaConsumer.getConsumer().wakeup();
+        System.out.println("stopping consumer..");
+
+        //
+        threadConsumer.join();
     }
 }
